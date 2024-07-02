@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import "firebase/firestore"
 import { getFirestore } from 'firebase/firestore';
 
@@ -23,6 +23,7 @@ const provider = new GoogleAuthProvider();
 export {
   auth,
   store,
-  provider
+  provider,
+  signInWithPopup,
 };
 export default app
