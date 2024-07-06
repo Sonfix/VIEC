@@ -154,9 +154,15 @@ export function DocumentProvider({ children }) {
     function createDescription() {
         let newDoc = new ProductDescription()
                         .setUser(currentUser.uid)
-                        .setCategory()
+                        .setCategory(null)
                         .setPrompt(default_prompt)
                         .setChanged(false);
+        
+        // let newImage = new Image()
+        //                     .setName("")
+        //                     .setImage_Link("")
+        //                     .setActive(false)
+        //                     .setUploadedAt(null);
 
         Documents.push(newDoc);
         
@@ -223,9 +229,9 @@ export function DocumentProvider({ children }) {
     //     // Sync()
     // }
 
-    useEffect(() => {
-        Sync();
-    })
+    // useEffect(() => {
+    //     Sync();
+    // })
 
     // const value = {
     //     currentDocument,

@@ -38,4 +38,9 @@ class Image {
         this.Active = active;
         return this;
     }
+
+    setUploadedAt(date) {
+        this.UploadedAt = date;
+        return this;
+    }
 }

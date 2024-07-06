@@ -42,9 +42,16 @@ export default function LogIn() {
   const [default_loading, setdefault_Loading] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { login, SignInWithGoogle } = useAuth();
+  const { login, SignInWithGoogle, currentUser} = useAuth();
 
   let navigation = useNavigate ();
+
+  async function handle_Google() {
+    await SignInWithGoogle();
+    
+    if (currentUser)
+     navigation("/", {replace: true})
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -57,9 +64,9 @@ export default function LogIn() {
       }
 
       setdefault_Loading(true);
-      await login(data.get('email'), data.get('password'));
+      await login(data.get('email'), data.get('password'));      
       
-      // handle_switch_to_signup("Text");
+      navigation("/", {replace: true})
     } catch (error){
       if (CheckResp(error, "auth/invalid-email")){
         // showToast("Fehler", "E-Mail nicht gefunden!", "error");
@@ -151,7 +158,7 @@ export default function LogIn() {
                 }}
               >
                 <GoogleButton
-                  onClick={() => { SignInWithGoogle() }}
+                  onClick={() => { handle_Google() }}
                   sx={{ mt: 3, mb: 2 }}
                 />
               </Box>

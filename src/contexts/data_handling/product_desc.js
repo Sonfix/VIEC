@@ -47,10 +47,15 @@ class ProductDescription {
 
     addDescription(desc) {
         this.Descriptions.push(desc);
-        return desc;
+        return this;
     }
 
     setChanged(changed) {
+        this.Changed = changed;
+        return this
+    }
 
+    getChanged() {
+        return this.Changed
     }
 }
