@@ -10,6 +10,6 @@ export default function PrivateRoute() {
     // Otherwise, redirect the user to /signin page
     currentUser ?
             <Outlet/>
-        : <Navigate to="/signin" />
+        : <Navigate to="/LogIn" />
   );
 }

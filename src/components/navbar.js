@@ -17,12 +17,28 @@ import { useNavigate  } from "react-router-dom"
 
 import {useAuth} from "../contexts/AuthContext"
 
-const pages = ['Products', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const pages = ['Funktionen', 'Preise', 'FAQ'];
+const settings = ['Account', 'App', 'Logout'];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  
+
+  const scrollToSection = (sectionId) => {
+    console.log(sectionId)
+    const sectionElement = document.getElementById(sectionId);
+    const offset = 128;
+    if (sectionElement) {
+      const targetScroll = sectionElement.offsetTop - offset;
+      sectionElement.scrollIntoView({ behavior: 'smooth' });
+      window.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth',
+      });
+    }
+  };
  
   const { logout, currentUser } = useAuth();
   let navigation = useNavigate ();
@@ -43,6 +59,9 @@ function ResponsiveAppBar() {
     if(text === "Logout") {
       logout();
     }
+    if (text === "App") {
+      navigation("/app", {replace: true})
+    }
     setAnchorElUser(null);
   };
 
@@ -51,7 +70,7 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <img
@@ -113,7 +132,7 @@ function ResponsiveAppBar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={() => scrollToSection(page)}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
@@ -142,7 +161,7 @@ function ResponsiveAppBar() {
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => scrollToSection(page)}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page}

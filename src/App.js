@@ -3,6 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import LandingPage from './components/landing_page'
 import LogIn from './components/user_handling/login'
 import SignUp from './components/user_handling/signup'
+import PrivateRoute from "./components/utils/PrivateRoute"
+import DescriptionMaker from "./components/app";
 
 import { DocumentProvider } from './contexts/DocumentContext';
 import { GenerationProvider } from "./contexts/GenerationContext";
@@ -17,6 +19,7 @@ function App() {
             <Route path="/" element={<LandingPage />}></Route>
             <Route path="/login" element={<LogIn />}></Route>
             <Route path="/signup" element={<SignUp />}></Route>
+            <Route path="/app" element={<DescriptionMaker />}></Route>
             {/* <GenerationProvider>
               <Route></Route>
             </GenerationProvider> */}
