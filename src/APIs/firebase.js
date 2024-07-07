@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 import "firebase/firestore"
 import { getFirestore } from 'firebase/firestore';
 
@@ -18,6 +19,7 @@ const app = initializeApp(firebaseConf);
 const auth = getAuth(app);
 
 const store = getFirestore(app);
+const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
 export {
@@ -25,5 +27,6 @@ export {
   store,
   provider,
   signInWithPopup,
+  storage,
 };
 export default app
