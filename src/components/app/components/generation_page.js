@@ -13,7 +13,7 @@ import Button from '@mui/material/Button';
 
 export default function GenerationPage() {
     const [GenMode, setGenMode] = React.useState('weighted');
-    const [URLs, setURLs] = React.useState(0);
+    const [URLs, setURLs] = React.useState([]);
     const [progress, setProgress] = React.useState(0);
     const [selectedImages, setSelectedImages] = React.useState([]);
   
@@ -43,7 +43,15 @@ export default function GenerationPage() {
               (error) => console.log(error),
               async () => {
                   await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
-                      setURLs(prevState => [...prevState, downloadURLs])
+                      
+                    setURLs(prevState => {
+                          if (Array.isArray(prevState)) {
+                              return [...prevState, downloadURLs];
+                          } else {
+                              console.error("prevState is not an array");
+                              return [downloadURLs];
+                          }
+                      });
                       console.log("File available at", downloadURLs);
                   });
               }
@@ -101,7 +109,7 @@ export default function GenerationPage() {
             boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.05)',
         }}
         >
-      <ImageSelection onImageUpload={onImageUpload}/>
+      <ImageSelection onImageUpload={onImageUpload} images={URLs}/>
       
       <Divider 
         textAlign="left"

@@ -11,6 +11,14 @@ import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 import BalanceIcon from '@mui/icons-material/Balance';
 
 export default function GenerationModeSelect(props) {
+  const [paymentType, setPaymentType] = React.useState('creditCard');
+  const [cardNumber, setCardNumber] = React.useState('');
+  const [cvv, setCvv] = React.useState('');
+  const [expirationDate, setExpirationDate] = React.useState('');
+
+  const handlePaymentTypeChange = (event) => {
+    setPaymentType(event.target.value);
+  };
     return(
         
       <FormControl component="fieldset" fullWidth>
@@ -28,6 +36,10 @@ export default function GenerationModeSelect(props) {
             maxWidth: { sm: '100%', md: '50%' },
             flexGrow: 1,
             outline: '1px solid',
+            outlineColor:
+              paymentType === 'creditCard' ? 'primary.main' : 'divider',
+            backgroundColor:
+              paymentType === 'creditCard' ? 'background.default' : '',
           }}
         >
           <CardActionArea onClick={() => props?.onModeChanged('weighted')}>
@@ -42,6 +54,10 @@ export default function GenerationModeSelect(props) {
             maxWidth: { sm: '100%', md: '50%' },
             flexGrow: 1,
             outline: '1px solid',
+            outlineColor:
+              paymentType === 'creditCard' ? 'primary.main' : 'divider',
+            backgroundColor:
+              paymentType === 'creditCard' ? 'background.default' : '',
           }}
         >
           <CardActionArea onClick={() => props?.onModeChanged('creativ')}>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ImageCarousel from './image_carousel';
 
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
@@ -44,30 +45,38 @@ export default function ImageSelection(props) {
                         sx={{
                         display: "flex",
                         justifyContent: "center",
-                        alignItems: "center",  
-                        height: "150px"                    
+                        alignItems: "center", 
+                        minHeight: "150px" ,
+                        height: "fit-content"                    
                         }}
                     >
-                        <CollectionsIcon 
-                            color="primary"
-                            sx={{
-                                fontSize: { xs: 56, sm: 64 },
-                                margin: "0 auto",
-                                left: "50%",
-                                height: "50%"
-                            }}
-                        />
+                        {props?.images.length === 0 && 
+                            <CollectionsIcon 
+                                color="primary"
+                                sx={{
+                                    fontSize: { xs: 56, sm: 64 },
+                                    margin: "0 auto",
+                                    left: "50%",
+                                    height: "50%"
+                                }}
+                            />
+                        }
+                        {props?.images.length > 0 &&
+                            <ImageCarousel images={props?.images}/>
+                        }
                     </Box>
                 </CardContent>
-                <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                    Bilder
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Du kannst hier einfach deine Bilder per Klick hochladen, oder ziehe sie einfach per Drag&Drop hier rein!
-                    Bitte achte darauf das ein Bild nicht größer als 5MB ist!
-                </Typography>
-                </CardContent>
+                {props?.images.length === 0 && 
+                    <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                        Bilder
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Du kannst hier einfach deine Bilder per Klick hochladen, oder ziehe sie einfach per Drag&Drop hier rein!
+                        Bitte achte darauf das ein Bild nicht größer als 5MB ist!
+                    </Typography>
+                    </CardContent>
+                }
             </CardActionArea>
         </Box>
     );
