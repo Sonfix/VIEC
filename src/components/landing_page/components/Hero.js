@@ -42,7 +42,7 @@ export default function Hero() {
               fontSize: 'clamp(3.5rem, 10vw, 4rem)',
             }}
           >
-            Our latest&nbsp;
+            Immer &nbsp;
             <Typography
               component="span"
               variant="h1"
@@ -52,7 +52,7 @@ export default function Hero() {
                   theme.palette.mode === 'light' ? 'primary.main' : 'primary.light',
               }}
             >
-              products
+              aktuell
             </Typography>
           </Typography>
           <Typography
@@ -60,9 +60,8 @@ export default function Hero() {
             color="text.secondary"
             sx={{ alignSelf: 'center', width: { sm: '100%', md: '80%' } }}
           >
-            Explore our cutting-edge dashboard, delivering high-quality solutions
-            tailored to your needs. Elevate your experience with top-tier features
-            and services.
+            Entdecke unser neues Dashoard und wie einfach du damit Produktbeschreibungen
+            genereiren kannst!
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -77,10 +76,10 @@ export default function Hero() {
               size="small"
               variant="outlined"
               aria-label="Enter your email address"
-              placeholder="Your email address"
+              placeholder="E-Mail"
               inputProps={{
                 autoComplete: 'off',
-                'aria-label': 'Enter your email address',
+                'aria-label': '',
               }}
             />
             <Button variant="contained" color="primary">
@@ -88,11 +87,11 @@ export default function Hero() {
             </Button>
           </Stack>
           <Typography variant="caption" textAlign="center" sx={{ opacity: 0.8 }}>
-            By clicking &quot;Start now&quot; you agree to our&nbsp;
+            Mit dem Klick auf &quot;Start now&quot; stimmst du unseren&nbsp;
             <Link href="#" color="primary">
-              Terms & Conditions
+              Terms & Conditions 
             </Link>
-            .
+            zu.
           </Typography>
         </Stack>
         <Box
@@ -104,8 +103,8 @@ export default function Hero() {
             width: '100%',
             backgroundImage:
               theme.palette.mode === 'light'
-                ? 'url("/static/images/templates/templates-images/hero-light.png")'
-                : 'url("/static/images/templates/templates-images/hero-dark.png")',
+                ? 'url("app.png")'
+                : 'url("app.png")',
             backgroundSize: 'cover',
             borderRadius: '10px',
             outline: '1px solid',

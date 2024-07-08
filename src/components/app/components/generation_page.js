@@ -9,6 +9,7 @@ import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import Stack from '@mui/material/Stack';
 import { Divider } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 export default function GenerationPage() {
     const [GenMode, setGenMode] = React.useState('weighted');
@@ -69,6 +70,10 @@ export default function GenerationPage() {
     const onAdditionalInfoChange = (info) => {
 
     };
+
+    const onStartGeneration = () => {
+      
+    };
     
   return (
     <>
@@ -115,7 +120,7 @@ export default function GenerationPage() {
           mb: "25px",
         }}
       ></Divider>
-      
+      <Button onClick={onStartGeneration} variant="contained">Start</Button>
       </Box>
     </Box>
     </Stack>

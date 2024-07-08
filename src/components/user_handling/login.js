@@ -49,7 +49,6 @@ export default function LogIn() {
   async function handle_Google() {
     await SignInWithGoogle();
     
-    if (currentUser)
      navigation("/", {replace: true})
   }
 

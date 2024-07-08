@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"
 import { auth, provider,  } from "../APIs/firebase"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, sendEmailVerification } from "firebase/auth";
 
 const AuthContext = React.createContext();
 
@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
       .then((userCredential) => {
         // Signed up 
         const user = userCredential.user;
+        sendEmailVerification(user);
         // ... do we need to do anything with user obj? onAuthStateChanged will do this..
       })
       // .catch((error) => {

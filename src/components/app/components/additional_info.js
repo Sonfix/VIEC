@@ -158,11 +158,11 @@ export default function AdditionalInfo(props) {
         
         <TextField
           id="outlined-multiline-static"
-          label="Multiline"
+          label="Kontext"
           multiline
           width="100%"
           rows={4}
-          defaultValue="Default Value"
+          defaultValue=""
         />
       </Box>
         </>
