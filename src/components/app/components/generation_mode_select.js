@@ -1,4 +1,4 @@
-
+import * as React from "react"
 
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -11,17 +11,19 @@ import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 import BalanceIcon from '@mui/icons-material/Balance';
 
 export default function GenerationModeSelect(props) {
-  const [paymentType, setPaymentType] = React.useState('creditCard');
-  const [cardNumber, setCardNumber] = React.useState('');
-  const [cvv, setCvv] = React.useState('');
-  const [expirationDate, setExpirationDate] = React.useState('');
+  const [paymentType, setGenType] = React.useState('weighted');
 
-  const handlePaymentTypeChange = (event) => {
-    setPaymentType(event.target.value);
+  const handleGenModeChange = (mode) => {
+    setGenType(mode);
+    props?.onModeChanged(mode);
   };
     return(
         
-      <FormControl component="fieldset" fullWidth>
+      <FormControl 
+        sx={{mb: "25px"}}
+        component="fieldset"
+        fullWidth
+      >
       <RadioGroup
         aria-label="Generation-mode"
         name="generation-mode"
@@ -37,12 +39,12 @@ export default function GenerationModeSelect(props) {
             flexGrow: 1,
             outline: '1px solid',
             outlineColor:
-              paymentType === 'creditCard' ? 'primary.main' : 'divider',
+              paymentType === 'weighted' ? 'primary.main' : 'divider',
             backgroundColor:
-              paymentType === 'creditCard' ? 'background.default' : '',
+              paymentType === 'weighted' ? 'background.default' : '',
           }}
         >
-          <CardActionArea onClick={() => props?.onModeChanged('weighted')}>
+          <CardActionArea onClick={() => handleGenModeChange('weighted')}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <BalanceIcon color="primary" fontSize="medium" />
               <Typography fontWeight="medium">Ausgewogen</Typography>
@@ -55,12 +57,12 @@ export default function GenerationModeSelect(props) {
             flexGrow: 1,
             outline: '1px solid',
             outlineColor:
-              paymentType === 'creditCard' ? 'primary.main' : 'divider',
+              paymentType === 'creativ' ? 'primary.main' : 'divider',
             backgroundColor:
-              paymentType === 'creditCard' ? 'background.default' : '',
+              paymentType === 'creativ' ? 'background.default' : '',
           }}
         >
-          <CardActionArea onClick={() => props?.onModeChanged('creativ')}>
+          <CardActionArea onClick={() => handleGenModeChange('creativ')}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <EmojiObjectsIcon color="primary" fontSize="medium" />
               <Typography fontWeight="medium">Kreativ</Typography>
