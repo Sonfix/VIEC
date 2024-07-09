@@ -27,7 +27,6 @@ export default function GenerationModeSelect(props) {
       <RadioGroup
         aria-label="Generation-mode"
         name="generation-mode"
-        // onChange={onModeChange}
         sx={{
           flexDirection: { sm: 'column', md: 'row' },
           gap: 2,

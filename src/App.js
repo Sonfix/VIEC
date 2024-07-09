@@ -15,15 +15,14 @@ function App() {
     <Router>
       <AuthProvider>
         <DocumentProvider>
+        <GenerationProvider>
           <Routes>
             <Route path="/" element={<LandingPage />}></Route>
             <Route path="/login" element={<LogIn />}></Route>
             <Route path="/signup" element={<SignUp />}></Route>
-            <Route path="/app" element={<DescriptionMaker />}></Route>
-            {/* <GenerationProvider>
-              <Route></Route>
-            </GenerationProvider> */}
+            <Route path="/app" element={<DescriptionMaker />}></Route>  
           </Routes>
+          </GenerationProvider>            
         </DocumentProvider>
       </AuthProvider>
     </Router>

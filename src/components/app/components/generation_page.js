@@ -2,6 +2,7 @@ import * as React from 'react';
 import ImageSelection from './image_select';
 import AdditionalInfo from './additional_info';
 import GenerationModeSelect from './generation_mode_select';
+import { useGeneration } from '../../../contexts/GenerationContext'
 
 import { storage } from '../../../APIs/firebase';
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
@@ -24,6 +25,8 @@ export default function GenerationPage() {
     const [uploading, setUploading] = React.useState(false);
     const [selectedImages, setSelectedImages] = React.useState([]);
     const [panelExpanded, setPanelExpanded] = React.useState('info');
+
+    const {run} = useGeneration();
   
     const onModeChange = (value) => {
       console.log(value);
@@ -51,7 +54,7 @@ export default function GenerationPage() {
               (error) => console.log(error),
               async () => {
                   await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
-                      
+                      console.log(downloadURLs)
                     setURLs(prevState => {
                           if (Array.isArray(prevState)) {
                               return [...prevState, downloadURLs];
@@ -79,7 +82,7 @@ export default function GenerationPage() {
       const files = e.target.files
       
       if (!files.length) return;
-      uploadFiles(files);
+      console.log(uploadFiles(files));
         
     }
   
@@ -89,6 +92,7 @@ export default function GenerationPage() {
 
     const onStartGeneration = () => {
       setPanelExpanded('generation');
+      run(["https://firebasestorage.googleapis.com/v0/b/viec-8cee8.appspot.com/o/files%2FJBL-Live-400-BT-Headphones-10.jpg?alt=media&token=84b7f70e-93c4-4e44-839f-44ce046a920a"]);
     };
 
     const onAccordionChange = (panel) => (event, isExpanded) => {
