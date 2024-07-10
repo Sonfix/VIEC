@@ -19,7 +19,7 @@ const items = [
     title: 'Dashboard',
     description:
       'This item could provide a snapshot of the most important metrics or data points related to the product.',
-    imageLight: 'url("/static/images/templates/templates-images/dash-light.png")',
+    imageLight: 'url("app.png")',
     imageDark: 'url("/static/images/templates/templates-images/dash-dark.png")',
   },
   {
@@ -55,7 +55,7 @@ export default function Features() {
         <Grid item xs={12} md={6}>
           <div>
             <Typography component="h2" variant="h4" color="text.primary">
-              Product features
+              Funktionen
             </Typography>
             <Typography
               variant="body1"

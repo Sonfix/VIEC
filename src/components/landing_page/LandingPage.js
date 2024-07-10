@@ -82,8 +82,8 @@ export default function Content() {
           <LogoCollection />
           <Features />
           <Divider />
-          <Testimonials />
-          <Divider />
+          {/* <Testimonials />
+          <Divider /> */}
           <Highlights />
           <Divider />
           <Pricing />

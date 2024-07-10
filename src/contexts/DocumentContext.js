@@ -161,46 +161,6 @@ export function DocumentProvider({ children }) {
         setDocuments(Documents);
     }
 
-    // function getDocuments() {
-    //     if (Documents.length === 0) {
-    //         // default_document.rw_data.Childs.forEach(child => {
-    //         //     child.color = getRandomColor()
-    //         // })
-    //         let newDoc = new Document()
-    //                         .addData("owner", currentUser.uid)
-    //                         .addData("title", "Neues Dokument")
-    //                         // .addData("rw_data", default_document.rw_data)
-            
-    //         Documents.push(newDoc);
-    //         setDocuments(Documents)
-    //     }
-    //     return Documents;
-    // }
-
-    // function getDocument(idx) {
-    //     return Documents[idx];
-    // }
-
-    // function setCurrentDocument(idx) {
-    //     let docRef = getDocument(idx)
-    //     localStorage.setItem("currentDocument",  JSON.stringify(docRef.getData()));
-    //     setCurrentDoc(docRef);
-    // }
-
-    // function updateDocument(document) {
-    //     document.updateData("last_edited", Date.now())
-    //     setCurrentDoc(document)
-        
-    //     localStorage.setItem("currentDocument",  JSON.stringify(document.getData()));
-    //     Documents.forEach(doc => {
-    //         if (doc.matches(document)) {
-    //             doc.updateData("rw_data", document.getDataByKey("rw_data"))
-    //         }
-    //     });
-    //     localStorage.setItem("documents", Documents);
-    //     setDocuments(Documents);
-    // }
-
     function    Sync() {
         if (!init) {
             console.log("Requesting")
@@ -220,7 +180,7 @@ export function DocumentProvider({ children }) {
     //     // Sync()
     // }
 
-    // useEffect(() => {
+    // useEwffect(() => {
     //     Sync();
     // })
 

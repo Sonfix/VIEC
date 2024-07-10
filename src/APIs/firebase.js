@@ -3,7 +3,6 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import "firebase/firestore"
 import { getFirestore } from 'firebase/firestore';
-
 const firebaseConf =
 {                     
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -20,6 +19,7 @@ const auth = getAuth(app);
 
 const store = getFirestore(app);
 const storage = getStorage(app);
+const storage2 = getStorage(app, "gs://my-custom-bucket");
 const provider = new GoogleAuthProvider();
 
 export {
@@ -28,5 +28,6 @@ export {
   provider,
   signInWithPopup,
   storage,
+  storage2,
 };
 export default app

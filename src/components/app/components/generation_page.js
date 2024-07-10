@@ -3,6 +3,7 @@ import ImageSelection from './image_select';
 import AdditionalInfo from './additional_info';
 import GenerationModeSelect from './generation_mode_select';
 import { useGeneration } from '../../../contexts/GenerationContext'
+import GenerationResult from './gen_result';
 
 import { storage } from '../../../APIs/firebase';
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
@@ -26,7 +27,7 @@ export default function GenerationPage() {
     const [selectedImages, setSelectedImages] = React.useState([]);
     const [panelExpanded, setPanelExpanded] = React.useState('info');
 
-    const {run} = useGeneration();
+    const {run, response} = useGeneration();
   
     const onModeChange = (value) => {
       console.log(value);
@@ -92,6 +93,7 @@ export default function GenerationPage() {
 
     const onStartGeneration = () => {
       setPanelExpanded('generation');
+      console.log(selectedImages)
       run(selectedImages);
     };
 
@@ -175,10 +177,7 @@ export default function GenerationPage() {
           <Typography>Content</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            malesuada lacus ex, sit amet blandit leo lobortis eget.
-          </Typography>
+          {<GenerationResult data={response}/>}
         </AccordionDetails>
       </Accordion>
     </Stack>
