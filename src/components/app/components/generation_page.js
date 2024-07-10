@@ -80,7 +80,7 @@ export default function GenerationPage() {
     const onImageUpload = (e) => {
       e.preventDefault()
       const files = e.target.files
-      
+      setSelectedImages(files)
       if (!files.length) return;
       console.log(uploadFiles(files));
         
@@ -92,7 +92,7 @@ export default function GenerationPage() {
 
     const onStartGeneration = () => {
       setPanelExpanded('generation');
-      run(["https://firebasestorage.googleapis.com/v0/b/viec-8cee8.appspot.com/o/files%2FJBL-Live-400-BT-Headphones-10.jpg?alt=media&token=84b7f70e-93c4-4e44-839f-44ce046a920a"]);
+      run(selectedImages);
     };
 
     const onAccordionChange = (panel) => (event, isExpanded) => {

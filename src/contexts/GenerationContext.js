@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react"
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
+import { GoogleGenerativeAI} from "@google/generative-ai"
 const GenerationContext = React.createContext()
 
 export function useGeneration() {
@@ -14,24 +13,24 @@ export function GenerationProvider({ children }) {
     // Access your API key as an environment variable (see "Set up your API key" above)
     const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
 
-    // // Converts local file information to a GoogleGenerativeAI.Part object.
-    // function fileToGenerativePart(file, mimeType) {
-    //   return {
-    //       fileData: {fileUri: file, mimeType: mimeType}
-    //   };
-    // }
-    
-  // Converts a File object to a Part object.
-  async function fileToGenerativePart(file) {
-    const base64EncodedDataPromise = new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.readAsDataURL(file);
-    });
-    return {
-      inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-    };
-  }
+     
+      // Converts local file information to a GoogleGenerativeAI.Part object.
+      async function fileToGenerativePart(path, mimeType) {
+        const reader = new FileReader()
+        let text = ""
+        reader.onload = (path) => {
+          text = path
+          console.log(text)
+        }
+        reader.readAsDataURL(path)
+
+        return {
+          inlineData: {
+            data: text.toString("base64"),
+            mimeType
+          },
+        };
+      }
     
     async function run(images) {
       // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
@@ -64,21 +63,14 @@ export function GenerationProvider({ children }) {
             "Besonderheiten": "Besonderheit XYZ",\
             "Tags": ["Tag1", "Tag2", "Tag3"]\
           }';
-    
-      // const imageParts = [
-      //   // fileToGenerativePart("image1.png", "image/png"),
-      //   // fileToGenerativePart("image2.jpeg", "image/jpeg"),
-      // ];
+     
+      const imageParts = [
+        [...images].map((img) => {
+          fileToGenerativePart(img)
+        })
+      ]
+      console.log(imageParts)  
 
-      const imageParts = await Promise.all(
-        [...images].map(fileToGenerativePart)
-      );
-
-      // images?.map((img) => {
-      //   let obj = await fileToGenerativePart(img);        
-      //   imageParts.push(obj)
-      // })  
-    
       const result = await model.generateContentStream([prompt, ...imageParts]);
       
       let text = '';
@@ -91,7 +83,6 @@ export function GenerationProvider({ children }) {
       console.log(text)
     }
     
-    // run();
     
     const value = {
       run

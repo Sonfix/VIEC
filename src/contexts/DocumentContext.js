@@ -38,15 +38,6 @@ Beispiel fuer den Output:\
   "Tags": ["Tag1", "Tag2", "Tag3"]\
 }';
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  }
-
 const DocumentContext = React.createContext();
 
 export function useDocContext() {
