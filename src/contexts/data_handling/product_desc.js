@@ -8,7 +8,8 @@ class ProductDescription {
         this.Prompt = null;
         this.CreatedAt = null;
         this.Images = [];
-        this.Descriptions = [];
+        this.Descriptions = {};
+        this.Response = [];
         this.Changed = false;
         this.ToDelete = false;
     }
@@ -53,8 +54,13 @@ class ProductDescription {
         return this.Images;
     }
 
-    addDescription(desc) {
-        this.Descriptions.push(desc);
+    setImages(imgs) {
+        this.Images = imgs;
+        return this;
+    }
+
+    addDescription(key, value) {
+        this.Descriptions[key] = value
         return this;
     }
 
@@ -88,6 +94,48 @@ class ProductDescription {
 
     getCreatedAt() {
         return this.CreatedAt;
+    }
+
+    getDescription(key) {
+        if (key in this.Descriptions) {
+            return this.Descriptions.key;
+        }
+        return null;
+    }
+
+    getDescriptionAsString() {
+        return JSON.stringify(this.Descriptions);
+    }
+
+    updateDescription(key, value) {
+        if (key in this.Descriptions) {
+            this.Descriptions.key = value;
+        }
+        return this;
+    }
+
+    addResponse(resp) {
+        this.Response.push(resp);
+        return this;
+    }
+
+    getResponses() {
+        return this.Response;
+    }
+
+    getPlainRespsones() {
+        return this.Response.map((desc) => {
+            return desc.getText();
+        })
+    }
+
+    getLatestResponse() {
+        if (this.Response[this.Response.length - 1]) {
+            return this.Response[this.Response.length - 1];
+        }
+        else {
+            return null;
+        }
     }
 }
 

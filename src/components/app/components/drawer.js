@@ -13,7 +13,6 @@ import StarBorderPurple500Icon from '@mui/icons-material/StarBorderPurple500';
 import RecyclingIcon from '@mui/icons-material/Recycling';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import { useNavigate  } from "react-router-dom"
 
 const drawerWidth = 240;
 

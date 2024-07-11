@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react"
+import React, { useContext, useState } from "react"
 import { GoogleGenerativeAI} from "@google/generative-ai"
 import { useDocContext } from "./DocumentContext"
 import { Description } from "./data_handling"
@@ -13,9 +13,8 @@ export function useGeneration() {
 export function GenerationProvider({ children }) {
     
     const [loading, setLoading] = useState(true)
-    const [response, setResponse] = useState("")
 
-    const { currentDocument } = useDocContext();
+    const { currentDocument, addResponse } = useDocContext();
 
     // Access your API key as an environment variable (see "Set up your API key" above)
     const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
@@ -35,7 +34,7 @@ export function GenerationProvider({ children }) {
     async function run(images) {
       // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       setLoading(true)
     
       const prompt = 
@@ -49,9 +48,10 @@ export function GenerationProvider({ children }) {
           6. Pflegehinweise (falls zutreffend) \
           7. Besonderheiten oder Alleinstellungsmerkmale \
           \
+          Wenn du Informationen wie Modellnamen oder Merkmale hinzufügst, sei dir bitte über 95% sicher. \
           Zusätzlich erstelle bitte eine Liste von relevanten Tags für dieses Produkt. Der Output soll in einem strukturierten Format sein, das für die automatisierte Weiterverarbeitung geeignet ist. \
           Bitte achte darauf das die Beschreibung mindest 100 Worte lang sein muss. \
-          Gib mir als Output bitte nur die folgende JSON Datei. Wenn du nichts finden bzw. erstellen konntest, so lasse die Values bitte leer.\          \
+          Gib mir als Output bitte nur die folgende JSON Datei. Wenn du nichts finden bzw. erstellen konntest, so lasse die Values bitte leer.\
           \
           Beispiel fuer den Output, bitte gib mir auch nur das wieder ohne markdown syntax oder ähnlichem:\
           {\
@@ -68,40 +68,31 @@ export function GenerationProvider({ children }) {
             "Tags": ["Tag1", "Tag2", "Tag3"]\
           }';
      
-      // console.log(images)   
+
       const imageParts = await Promise.all(
         Array.from(images).map((img) => {
           return fileToGenerativePart(img);
         })
       );
         
-      
-      // console.log(imageParts) 
-      setResponse(""); 
       const result = await model.generateContentStream([prompt, imageParts]);
       
-      let text = '';
       let desc = new Description();
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
-        text += chunkText;
         desc.addText(chunkText);
-        // try {
-        //   setResponse(JSON.parse(text));
-        // }
-        // catch {
-        //   // console.log(text)
-        // }
       }
-      console.log(desc)
-      console.log(JSON.parse(desc.getText()))
+      
+      addResponse(currentDocument, desc);
+      
+      // console.log(currentDocument)
       setLoading(false)
     }
     
     
     const value = {
       run,
-      response
+      loading
     }
 
     return (

@@ -1,20 +1,21 @@
 
-const template =
-  {
-    Produktname: "Beispiel Produktname",
-    Titel: "Ein Aussagekräftiger, zum verkauf anregender Titel",
-    Beschreibung: "Dies ist eine detaillierte und SEO-optimierte Produktbeschreibung...",
-    Hauptmerkmale: ["Merkmal 1", "Merkmal 2", "Merkmal 3"],
-    Vorteile: ["Vorteil 1", "Vorteil 2"],
-    Materialien: "Hochwertiges Material XYZ",
-    Anwendungsbereiche: ["Bereich 1", "Bereich 2"],
-    Zielgruppe: "Zielgruppe XYZ",
-    Pflegehinweise: "Pflegehinweis XYZ",
-    Besonderheiten: "Besonderheit XYZ",
-    Tags: ["Tag1", "Tag2", "Tag3"]
-  };
+// const template =
+//   {
+//     Produktname: "Beispiel Produktname",
+//     Titel: "Ein Aussagekräftiger, zum verkauf anregender Titel",
+//     Beschreibung: "Dies ist eine detaillierte und SEO-optimierte Produktbeschreibung...",
+//     Hauptmerkmale: ["Merkmal 1", "Merkmal 2", "Merkmal 3"],
+//     Vorteile: ["Vorteil 1", "Vorteil 2"],
+//     Materialien: "Hochwertiges Material XYZ",
+//     Anwendungsbereiche: ["Bereich 1", "Bereich 2"],
+//     Zielgruppe: "Zielgruppe XYZ",
+//     Pflegehinweise: "Pflegehinweis XYZ",
+//     Besonderheiten: "Besonderheit XYZ",
+//     Tags: ["Tag1", "Tag2", "Tag3"]
+//   };
 
 
+// const keys = ["Titel", "Beschreibung", "Hauptmerkmale", "Besonderheiten", "Tags"]
 
 class Description {
     constructor() {
@@ -29,7 +30,7 @@ class Description {
     trimStr(str) {
         const startIndex = str.indexOf('{');
         const endIndex = str.lastIndexOf('}');
-        console.log('String: %s <startId: %d> <endId: %d>', str, startIndex, endIndex)
+        // console.log('String: %s <startId: %d> <endId: %d>', str, startIndex, endIndex)
         
         if (startIndex !== -1) {
             this._StartPar = true;
@@ -37,11 +38,10 @@ class Description {
         }
         if (endIndex !== -1) {
             this._EndPar = true;
-            str = str.substring(endIndex, str.length)
+            str = str.substring(0, endIndex+1)
         }
-        
-        if (!this._StartPar) return "";
-        console.log("After trimm: %s", str)
+        else if (!this._StartPar || this._EndPar) return "";
+        // console.log("After trimm: %s", str)
         return str; 
     }
 
@@ -50,7 +50,7 @@ class Description {
     }
 
     getText() {
-        return this._RawText;
+        return this.trimStr(this._RawText);
     }
 
     getCreatedAt() {
@@ -64,13 +64,7 @@ class Description {
 
     // we'll upadte our internal data everytime we get a new chunk
     update() {
-        try {
-            let jsn = JSON.parse(this._RawText);
-            console.log(jsn);
-        }
-        catch {
-            // console.log(this._RawText)
-        }
+        // For future use: Will be used for live updates
     }
 
     addText(txt) {
@@ -87,6 +81,15 @@ class Description {
 
     getData() {
         return this.Data;
+    }
+
+    getJSON() {
+        try {
+            return JSON.parse(this._RawText);
+        }
+        catch {
+            return null;
+        }
     }
 }
 

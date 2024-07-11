@@ -9,7 +9,7 @@ import { storage } from '../../../APIs/firebase';
 import { useAuth } from "../../../contexts/AuthContext";
 import { useDocContext } from '../../../contexts/DocumentContext';
 
-import { ref, getDownloadURL, uploadBytesResumable, getMetadata  } from "firebase/storage";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 
 import Stack from '@mui/material/Stack';
 import { Divider } from '@mui/material';
@@ -21,6 +21,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function GenerationPage(props) {
     const [GenMode, setGenMode] = React.useState('weighted');
@@ -32,8 +33,8 @@ export default function GenerationPage(props) {
 
     const [storageFileNames, setStorageFileNames] = React.useState([])
 
-    const {run, response} = useGeneration();
-    const { addImagesToDescription, _set_documents, currentDocument } = useDocContext();
+    const {run, loading} = useGeneration();
+    const { addImagesToDescription, currentDocument, addDescriptor } = useDocContext();
     const { currentUser } = useAuth();
 
     const onModeChange = (value) => {
@@ -71,10 +72,6 @@ export default function GenerationPage(props) {
               (error) => console.log(error),
               async () => {
                   await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
-                    // getMetadata(sotrageRef)
-                    // .then((metadata) => {
-                    //   console.log(metadata)
-                    // })
                     setURLs(prevState => {
                           if (Array.isArray(prevState)) {
                               return [...prevState, downloadURLs];
@@ -94,12 +91,12 @@ export default function GenerationPage(props) {
           .then(() => {
             setUploading(false);
 
-            if (props?.description !== null) {
+            if (currentDocument !== null) {
               addImagesToDescription(currentDocument, storageFileNames)
             }
-            console.log(props?.description)
+            console.log(currentDocument)
 
-            _set_documents()
+            // _set_documents()
           })
           .then(err => console.log(err))
 
@@ -117,12 +114,14 @@ export default function GenerationPage(props) {
     }
   
     const onAdditionalInfoChange = (info) => {
-
+      console.log({id: info.target.id, value: info.target.value})
+      addDescriptor(currentDocument, {id: info.target.id, value: info.target.value})
     };
 
     const onStartGeneration = () => {
       setPanelExpanded('generation');
       
+      // _set_documents();
       run(selectedImages);
     };
 
@@ -206,7 +205,8 @@ export default function GenerationPage(props) {
           <Typography>Content</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {<GenerationResult data={response}/>}
+          {!loading && <GenerationResult data={currentDocument?.getLatestResponse()?.getJSON()}/>}
+          {loading && <CircularProgress />}
         </AccordionDetails>
       </Accordion>
     </Stack>

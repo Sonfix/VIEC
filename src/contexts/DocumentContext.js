@@ -6,17 +6,15 @@ import {
     query, 
     where, 
     updateDoc, 
-    deleteDoc,
     serverTimestamp 
 } from 'firebase/firestore';
 import { store } from "../APIs/firebase"
 import { useAuth } from "./AuthContext";
-import {Encrypt, Decrypt} from "../components/utils/encryption"
 import {
     ProductDescription,
     Image,
-    Description,
-    Tag
+    // Description,
+    // Tag
 } from "./data_handling"
 
 // import ProductDescription from './data_handling/product_desc'
@@ -32,10 +30,12 @@ const default_prompt =
 6. Pflegehinweise (falls zutreffend) \
 7. Besonderheiten oder Alleinstellungsmerkmale \
 \
+Wenn du Informationen wie Modellnamen oder Merkmale hinzufügst, sei dir bitte über 95% sicher. \
 Zusätzlich erstelle bitte eine Liste von relevanten Tags für dieses Produkt. Der Output soll in einem strukturierten Format sein, das für die automatisierte Weiterverarbeitung geeignet ist. \
 Bitte achte darauf das die Beschreibung mindest 100 Worte lang sein muss. \
+Gib mir als Output bitte nur die folgende JSON Datei. Wenn du nichts finden bzw. erstellen konntest, so lasse die Values bitte leer.\
 \
-Beispiel fuer den Output:\
+Beispiel fuer den Output, bitte gib mir auch nur das wieder ohne markdown syntax oder ähnlichem:\
 {\
   "Produktname": "Beispiel Produktname",\
   "Titel": "Ein Aussagekräftiger, zum verkauf anregender Titel",\
@@ -66,7 +66,7 @@ export function DocumentProvider({ children }) {
         null
     );
     
-    let init = false;
+    const [init, setInit] = useState(false);
 
     const { currentUser } = useAuth();
 
@@ -74,7 +74,7 @@ export function DocumentProvider({ children }) {
      * sends request via google firestore API to retrive documents
      */
     async function _request_documents() {    
-        const q = query(collection(store, "prodcut_descriptions"), 
+        const q = query(collection(store, "product_descriptions"), 
                         where("user", "==", currentUser.uid));
 
         const querySnapshot = await getDocs(q);
@@ -88,9 +88,30 @@ export function DocumentProvider({ children }) {
                             .setImages(doc.data().images)
                             .setChanged(false);
 
-            // console.log("Requested Document: ", buff)
+            console.log("Requested Document: ", buff)
             _docs.push(buff);
         });
+        console.log(_docs)
+        _docs.forEach((doc) => {
+            let Image_Objects = []
+            doc.getImages().forEach(async (img) => {
+                const Img_q = query(collection(store, "images"));
+                const image_snap = await getDocs(Img_q);
+
+                image_snap.forEach((s_img) => {
+                    
+                    if (s_img.id === img) {
+                        let obj = new Image()
+                                        .setName(s_img.data().name)
+                                        .setImage_Link(s_img.data().image_link)
+                                        .setMimeType(s_img.data().mimeType);
+                        Image_Objects.push(obj);
+                    }
+                })
+                doc.setImages(Image_Objects)
+            })
+        })
+        console.log(_docs)
 
         // this creates a true deep copy of docs 
         // https://dev.to/samanthaming/how-to-deep-clone-an-array-in-javascript-3cig
@@ -110,8 +131,8 @@ export function DocumentProvider({ children }) {
                     
                     // if we upload newly added doc, than upload the image obj ref to
                     
-                    doc.getImages().map((img) => {
-                        addDoc(collection(store, "images"), {
+                    doc.getImages().map(async (img) => {
+                        return addDoc(collection(store, "images"), {
                                 "name": img.getName(),
                                 "image_link": img.getImage_Link(),
                                 "active": true,
@@ -128,6 +149,8 @@ export function DocumentProvider({ children }) {
                                 "prompt": doc.getPrompt(),
                                 "status": 0,
                                 "images": doc.getImages().map(obj => obj.getCntId()),
+                                "descriptors": doc.getDescriptionAsString(),
+                                "responses": doc.getPlainRespsones(),
                             }).then((docRef) => {
                                 doc.setCntId(docRef.id);
                                 doc.setChanged(false);
@@ -138,15 +161,15 @@ export function DocumentProvider({ children }) {
                 }
                 else {
                     console.log("Upating in cloud", doc)
-                    // const docRef = doc(store, "diagramms", doc.getDataByKey("cnt_id"))
-                    // updateDoc(docRef, {
-                    //     "createdAt": doc.getDataByKey("createdAt"),
-                    //     "title": doc.getDataByKey("title"),
-                    //     "owner": doc.getDataByKey("owner"),
-                    //     "cnt_id": doc.getDataByKey("cnt_id"),
-                    //     "rw_data": Encrypt(doc.getDataByKey("rw_data"), currentUser),
-                    //     "last_edited": doc.getDataByKey("last_edited"),
-                    // })
+                    const docRef = doc(store, "diagramproduct_descriptionsms", doc.getCntId())
+                    updateDoc(docRef, {
+                                "user" : doc.getUser(),
+                                "prompt": doc.getPrompt(),
+                                "status": 0,
+                                "images": doc.getImages().map(obj => obj.getCntId()),
+                                "descriptors": doc.getDescriptionAsString(),
+                                "responses": doc.getPlainRespsones(),
+                    })
                 }
                 doc.setChanged(false)
             }
@@ -171,14 +194,7 @@ export function DocumentProvider({ children }) {
                         .setCategory(null)
                         .setPrompt(default_prompt)
                         .setChanged(false);
-        
-        
-        // let newImage = new Image()
-        //                     .setName("")
-        //                     .setImage_Link("")
-        //                     .setActive(false)
-        //                     .setUploadedAt(null);
-
+         
         Documents.push(newDoc);
         setCurrentDoc(newDoc);
         try {
@@ -196,21 +212,10 @@ export function DocumentProvider({ children }) {
         return path.replace(/^.*[\\/]/, '')
     }
 
-    async function fileToGenerativePart(file) {
-        const base64EncodedDataPromise = new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result.split(',')[1]);
-          reader.readAsDataURL(file);
-        });
-        return {
-          inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-        };
-      }
-
     function addImagesToDescription(description, images) {
         if (Array.isArray(images) ) {
                 // Promise.all(
-                    images.map((img) => {
+                    images.forEach((img) => {
                         
                         const obj = new Image()
                                         .setName(getFileName(img.name))
@@ -218,8 +223,8 @@ export function DocumentProvider({ children }) {
                                         .setActive(true)
                                         .setMimeType(img.type);
                         
-                        fileToGenerativePart(img.file)
-                            .then((data) => (obj.setBase64Rep(data)))
+                        // fileToGenerativePart(img.file)
+                        //     .then((data) => (obj.setBase64Rep(data)))
                     description.addImage(obj);
                     description.setChanged(true);
                 })
@@ -227,15 +232,33 @@ export function DocumentProvider({ children }) {
         }
     }
 
+    function addDescriptor(description, info) {
+        const desc = description.getDescription(info.id);
+        console.log(description, info)
+        if (desc) {
+            description.updateDescription(info.id, info.value);
+        }
+        else {
+            description.addDescription(info.id, info.value);
+        }
+        description.setChanged(true);
+    }
+
     function Sync() {
         if (!init) {
             console.log("Requesting")
-            // _request_documents();
-            init = true;
+            _request_documents();
+            setInit(true);
         }
         else {
-            // _set_documents(Documents)
+            console.log("Syncing")
+            _set_documents(Documents)
         }
+    }
+
+    function addResponse(doc, desc) {
+        doc.addResponse(desc);
+        doc.setChanged(true);
     }
 
     // function deleteDocument(id) {
@@ -246,9 +269,9 @@ export function DocumentProvider({ children }) {
     //     // Sync()
     // }
 
-    // useEwffect(() => {
-    //     Sync();
-    // })
+    useEffect(() => {
+        Sync();
+    }, [currentDocument, Documents])
 
     // const value = {
     //     currentDocument,
@@ -265,6 +288,8 @@ export function DocumentProvider({ children }) {
         createDescription,
         addImagesToDescription,
         _set_documents,
+        addDescriptor,
+        addResponse,
     }
 
    return(

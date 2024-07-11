@@ -1,8 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
 
 const destLang = [
   {
@@ -38,25 +36,6 @@ const phrasing = [
     }
 ];  
 
-const output = [
-    {
-        value: "txt",
-        label: "Text",
-    },
-    {
-        value: "json",
-        label: "JSON",
-    },
-    {
-        value: "xml",
-        label: "XML",
-    },
-    {
-        value: "html",
-        label: "HTML",
-    },
-]
-
 const category = [
     {
         value: "home",
@@ -82,15 +61,16 @@ export default function AdditionalInfo(props) {
           id="destination-language"
           select
           label="Zielsprache"
-          defaultValue="de"
+          onChange={props?.onInfoChanged}
+          helperText="Wie sollen wir den Text schreiben?"
+          variant="filled"
           SelectProps={{
             native: true,
           }}
-          helperText="Wie sollen wir den Text schreiben?"
-          variant="filled"
+          defaultValue = ""
         >
           {destLang.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.label}>
               {option.label}
             </option>
           ))}
@@ -99,32 +79,16 @@ export default function AdditionalInfo(props) {
           id="phrasing"
           select
           label="Formulierung"
-          defaultValue="prof"
-          SelectProps={{
-            native: true,
-          }}
+          onChange={props?.onInfoChanged}
           helperText="Wie sollen wir den Text schreiben?"
           variant="filled"
-        >
-          {phrasing.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </TextField>
-        <TextField
-          id="output"
-          select
-          label="Ausgabe"
-          defaultValue="txt"
+          defaultValue = ""
           SelectProps={{
             native: true,
           }}
-          helperText="Wie möchtest du deine Daten haben?"
-          variant="filled"
         >
-          {output.map((option) => (
-            <option key={option.value} value={option.value}>
+          {phrasing.map((option) => (
+            <option key={option.value} value={option.label}>
               {option.label}
             </option>
           ))}
@@ -133,15 +97,16 @@ export default function AdditionalInfo(props) {
           id="category"
           select
           label="Kategorie"
-          defaultValue="prof"
+          defaultValue = ""
+          onChange={props?.onInfoChanged}
+          helperText="In was für eine Kategorie gehört das für dich?"
+          variant="filled"
           SelectProps={{
             native: true,
           }}
-          helperText="In was für eine Kategorie gehört das für dich?"
-          variant="filled"
         >
           {category.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.label}>
               {option.label}
             </option>
           ))}
@@ -157,14 +122,16 @@ export default function AdditionalInfo(props) {
       >
         
         <TextField
-          id="outlined-multiline-static"
+          id="context"
           label="Kontext"
           multiline
           width="100%"
           rows={4}
           defaultValue=""
+          onChange={props?.onInfoChanged}
         />
       </Box>
+
         </>
     );
 }

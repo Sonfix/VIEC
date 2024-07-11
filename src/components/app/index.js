@@ -15,7 +15,6 @@ import { useDocContext } from '../../contexts/DocumentContext'
 export default function DescriptionMaker() {
   
   const [mode, setMode] = React.useState('display');
-  const [currentDesc, setCurrentDesc] = React.useState(null);
 
   const { createDescription } = useDocContext();
 
