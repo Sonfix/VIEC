@@ -53,11 +53,8 @@ let sub_items = [
 
 export default function ClippedDrawer(props) {
 
-    let navigation = useNavigate ();
-
     function onItemClick(action) {
         if (action == null) return;
-        console.log(action)
         
         props?.onItemSelect(action);
     }

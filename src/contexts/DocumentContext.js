@@ -1,5 +1,14 @@
 import React, { useContext, useState, useEffect } from "react"
-import { addDoc, collection, getDocs,  query, where, updateDoc, deleteDoc } from 'firebase/firestore';
+import { 
+    addDoc,
+    collection, 
+    getDocs, 
+    query, 
+    where, 
+    updateDoc, 
+    deleteDoc,
+    serverTimestamp 
+} from 'firebase/firestore';
 import { store } from "../APIs/firebase"
 import { useAuth } from "./AuthContext";
 import {Encrypt, Decrypt} from "../components/utils/encryption"
@@ -10,6 +19,7 @@ import {
     Tag
 } from "./data_handling"
 
+// import ProductDescription from './data_handling/product_desc'
 
 const default_prompt = 
 // eslint-disable-next-line no-multi-str
@@ -23,10 +33,12 @@ const default_prompt =
 7. Besonderheiten oder Alleinstellungsmerkmale \
 \
 Zusätzlich erstelle bitte eine Liste von relevanten Tags für dieses Produkt. Der Output soll in einem strukturierten Format sein, das für die automatisierte Weiterverarbeitung geeignet ist. \
+Bitte achte darauf das die Beschreibung mindest 100 Worte lang sein muss. \
 \
 Beispiel fuer den Output:\
 {\
   "Produktname": "Beispiel Produktname",\
+  "Titel": "Ein Aussagekräftiger, zum verkauf anregender Titel",\
   "Beschreibung": "Dies ist eine detaillierte und SEO-optimierte Produktbeschreibung...",\
   "Hauptmerkmale": ["Merkmal 1", "Merkmal 2", "Merkmal 3"],\
   "Vorteile": ["Vorteil 1", "Vorteil 2"],\
@@ -44,16 +56,6 @@ export function useDocContext() {
     return useContext(DocumentContext)
 }
 
-/*
-    General Structur of handled documents
-    Each Document will represent a singel item with in the state.Documents array
-    A Document in certain will have the following structue
-    createdAt: DateTime Stamp of Server
-    title: Title of document
-    owner: will be the uid of the creating user
-    rw_data: will be the raw data format the app is using -> Structure needs to be defined
-    last_edited: DateTime Stamp of server from last saving process
-*/
 export function DocumentProvider({ children }) {
 
     const [Documents, setDocuments] = useState(
@@ -83,6 +85,7 @@ export function DocumentProvider({ children }) {
                             .setUser(doc.data().user)
                             .setCategory(doc.data().category)
                             .setPrompt(doc.data().prompt)
+                            .setImages(doc.data().images)
                             .setChanged(false);
 
             // console.log("Requested Document: ", buff)
@@ -97,42 +100,62 @@ export function DocumentProvider({ children }) {
     // /**
     //  * sends the documents to firestore
     //  */
-    // async function _set_documents() {
-    //     console.log("Start uploading to cloud", Documents)
-    //     Documents.forEach(doc => {
-    //         if (doc.getChanged() && !doc.getDataByKey("toDelete")) {       // Don't upload stuff which has not changed. So in most caes we will only upload/update one document per cycle.     
-    //             if(doc.getDataByKey("cnt_id") === "") {
-    //                 // not in firestore upload
-    //                 console.log("Adding to cloud", doc)
-    //                 const docRef = addDoc(collection(store, "diagramms"), {
-    //                         "createdAt": doc.getDataByKey("createdAt"),
-    //                         "title": doc.getDataByKey("title"),
-    //                         "owner": doc.getDataByKey("owner"),
-    //                         "cnt_id": doc.getDataByKey("cnt_id"),
-    //                         "rw_data": Encrypt(doc.getDataByKey("rw_data"), currentUser),
-    //                         "last_edited": doc.getDataByKey("last_edited"),
-    //                 }) 
-    //                 doc.updateData("cnt_id", docRef.id)
-    //             }
-    //             else {
-    //                 console.log("Upating in cloud", doc)
-    //                 const docRef = doc(store, "diagramms", doc.getDataByKey("cnt_id"))
-    //                 updateDoc(docRef, {
-    //                     "createdAt": doc.getDataByKey("createdAt"),
-    //                     "title": doc.getDataByKey("title"),
-    //                     "owner": doc.getDataByKey("owner"),
-    //                     "cnt_id": doc.getDataByKey("cnt_id"),
-    //                     "rw_data": Encrypt(doc.getDataByKey("rw_data"), currentUser),
-    //                     "last_edited": doc.getDataByKey("last_edited"),
-    //                 })
-    //             }
-    //             doc.setChanged(false)
-    //         }
-    //         else if (doc.getDataByKey("toDelete")) {
-    //             _deleteDocument(doc)
-    //         }
-    //     })
-    // }
+    async function _set_documents() {
+        console.log("Start uploading to cloud", Documents)
+        Documents.forEach(doc => {
+            if (doc.getChanged() && !doc.getToDelete()) {       // Don't upload stuff which has not changed. So in most caes we will only upload/update one document per cycle.     
+                if(doc.getCntId() === "") {
+                    // not in firestore upload
+                    console.log("Adding to cloud", doc)
+                    
+                    // if we upload newly added doc, than upload the image obj ref to
+                    
+                    doc.getImages().map((img) => {
+                        addDoc(collection(store, "images"), {
+                                "name": img.getName(),
+                                "image_link": img.getImage_Link(),
+                                "active": true,
+                                "shouldBeDeleted": false,
+                                "mimeType": img.getMimeType()
+                        }).then((ref) => {
+                            img.setCntId(ref.id);
+                            img.setChanged(false);
+                            
+                            doc.setCreatedAt(serverTimestamp ());
+                            addDoc(collection(store, "product_descriptions"), {
+                                "createdAt": doc.getCreatedAt(),
+                                "user" : doc.getUser(),
+                                "prompt": doc.getPrompt(),
+                                "status": 0,
+                                "images": doc.getImages().map(obj => obj.getCntId()),
+                            }).then((docRef) => {
+                                doc.setCntId(docRef.id);
+                                doc.setChanged(false);
+                            })
+                            
+                        })
+                    })                    
+                }
+                else {
+                    console.log("Upating in cloud", doc)
+                    // const docRef = doc(store, "diagramms", doc.getDataByKey("cnt_id"))
+                    // updateDoc(docRef, {
+                    //     "createdAt": doc.getDataByKey("createdAt"),
+                    //     "title": doc.getDataByKey("title"),
+                    //     "owner": doc.getDataByKey("owner"),
+                    //     "cnt_id": doc.getDataByKey("cnt_id"),
+                    //     "rw_data": Encrypt(doc.getDataByKey("rw_data"), currentUser),
+                    //     "last_edited": doc.getDataByKey("last_edited"),
+                    // })
+                }
+                doc.setChanged(false)
+            }
+            // else if (doc.getDataByKey("toDelete")) {
+            //     // _deleteDocument(doc)
+            // }
+        })
+        // localStorage.setItem("documents", JSON.stringify(Documents));
+    }
 
     // async function _deleteDocument(doc) {
     //     const docRef = doc(store, "diagramms", doc.getDataByKey("cnt_id"))
@@ -149,6 +172,7 @@ export function DocumentProvider({ children }) {
                         .setPrompt(default_prompt)
                         .setChanged(false);
         
+        
         // let newImage = new Image()
         //                     .setName("")
         //                     .setImage_Link("")
@@ -156,12 +180,54 @@ export function DocumentProvider({ children }) {
         //                     .setUploadedAt(null);
 
         Documents.push(newDoc);
-        
-        localStorage.setItem("documents", JSON.stringify(Documents));
+        setCurrentDoc(newDoc);
+        try {
+            localStorage.setItem("product_descriptions", JSON.stringify(Documents));
+        }
+        catch {
+            localStorage.clear()
+        }
         setDocuments(Documents);
+        return newDoc
     }
 
-    function    Sync() {
+   
+    const getFileName = (path) => {
+        return path.replace(/^.*[\\/]/, '')
+    }
+
+    async function fileToGenerativePart(file) {
+        const base64EncodedDataPromise = new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(file);
+        });
+        return {
+          inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+        };
+      }
+
+    function addImagesToDescription(description, images) {
+        if (Array.isArray(images) ) {
+                // Promise.all(
+                    images.map((img) => {
+                        
+                        const obj = new Image()
+                                        .setName(getFileName(img.name))
+                                        .setImage_Link(img.name)
+                                        .setActive(true)
+                                        .setMimeType(img.type);
+                        
+                        fileToGenerativePart(img.file)
+                            .then((data) => (obj.setBase64Rep(data)))
+                    description.addImage(obj);
+                    description.setChanged(true);
+                })
+            // )
+        }
+    }
+
+    function Sync() {
         if (!init) {
             console.log("Requesting")
             // _request_documents();
@@ -195,7 +261,10 @@ export function DocumentProvider({ children }) {
     // }
 
     const value = {
-
+        currentDocument,
+        createDescription,
+        addImagesToDescription,
+        _set_documents,
     }
 
    return(

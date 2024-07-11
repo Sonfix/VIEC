@@ -2,6 +2,7 @@
 class ProductDescription {
 
     constructor() {
+        this.ContainerId = "";
         this.User = null;
         this.Category = null;
         this.Prompt = null;
@@ -9,8 +10,11 @@ class ProductDescription {
         this.Images = [];
         this.Descriptions = [];
         this.Changed = false;
-        
-        return this;
+        this.ToDelete = false;
+    }
+
+    getCntId() {
+        return this.ContainerId;
     }
 
     getUser() {
@@ -45,6 +49,10 @@ class ProductDescription {
         return this;
     }
 
+    getImages() {
+        return this.Images;
+    }
+
     addDescription(desc) {
         this.Descriptions.push(desc);
         return this;
@@ -58,4 +66,29 @@ class ProductDescription {
     getChanged() {
         return this.Changed
     }
+
+    setCntId(id) {
+        this.ContainerId = id;
+        return this;
+    }
+
+    setToDelete(b) {
+        this.ToDelete = b;
+        return this;
+    }
+
+    getToDelete() {
+        return this.ToDelete;
+    }
+
+    setCreatedAt(ts) {
+        this.CreatedAt = ts;
+        return this;
+    }
+
+    getCreatedAt() {
+        return this.CreatedAt;
+    }
 }
+
+export default ProductDescription

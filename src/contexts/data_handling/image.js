@@ -1,11 +1,15 @@
 
 class Image {
     constructor() {
+        this.ContainerId = "";
         this.Name = "";
         this.Image_Link = "";
         this.UploadedAt = "";
         this.Active = "";
+        this.Base64 = "";
         this.ShouldBeDeleted = false;
+        this.Changed = false;
+        this.MimeType = "";
     }
 
     getName() {
@@ -43,4 +47,43 @@ class Image {
         this.UploadedAt = date;
         return this;
     }
+
+    setBase64Rep(b64) {
+        this.Base64 = b64;
+        return this;
+    }
+
+    getBase64Rep() {
+        return this.Base64;
+    }
+    
+
+    setCntId(id) {
+        this.ContainerId = id;
+        return this;
+    }
+
+    getCntId() {
+        return this.ContainerId;
+    }
+
+    setMimeType(t) {
+        this.MimeType = t;
+        return this;
+    }
+
+    getMimeType() {
+        return this.MimeType;
+    }
+
+    setChanged(b) {
+        this.Changed = b;
+        return this;
+    }
+
+    getChanged() {
+        return this.Changed;
+    }
 }
+
+export default Image;

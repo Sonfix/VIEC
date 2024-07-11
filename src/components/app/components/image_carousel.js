@@ -57,6 +57,7 @@ export default function ImageCarousel(props) {
             {Math.abs(activeStep - index) <= 2 ? (
               <Box
                 component="img"
+                key={index}
                 sx={{
                   height: 255,
                   display: 'block',

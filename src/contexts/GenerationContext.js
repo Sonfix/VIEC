@@ -1,5 +1,7 @@
 import React, { useContext, useState, useEffect } from "react"
 import { GoogleGenerativeAI} from "@google/generative-ai"
+import { useDocContext } from "./DocumentContext"
+import { Description } from "./data_handling"
 
 const GenerationContext = React.createContext()
 
@@ -12,6 +14,9 @@ export function GenerationProvider({ children }) {
     
     const [loading, setLoading] = useState(true)
     const [response, setResponse] = useState("")
+
+    const { currentDocument } = useDocContext();
+
     // Access your API key as an environment variable (see "Set up your API key" above)
     const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
          
@@ -46,8 +51,9 @@ export function GenerationProvider({ children }) {
           \
           Zusätzlich erstelle bitte eine Liste von relevanten Tags für dieses Produkt. Der Output soll in einem strukturierten Format sein, das für die automatisierte Weiterverarbeitung geeignet ist. \
           Bitte achte darauf das die Beschreibung mindest 100 Worte lang sein muss. \
+          Gib mir als Output bitte nur die folgende JSON Datei. Wenn du nichts finden bzw. erstellen konntest, so lasse die Values bitte leer.\          \
           \
-          Beispiel fuer den Output:\
+          Beispiel fuer den Output, bitte gib mir auch nur das wieder ohne markdown syntax oder ähnlichem:\
           {\
             "Produktname": "Beispiel Produktname",\
             "Titel": "Ein Aussagekräftiger, zum verkauf anregender Titel",\
@@ -62,30 +68,34 @@ export function GenerationProvider({ children }) {
             "Tags": ["Tag1", "Tag2", "Tag3"]\
           }';
      
-      console.log(images)   
+      // console.log(images)   
       const imageParts = await Promise.all(
-        Array.from(images).map(fileToGenerativePart)
+        Array.from(images).map((img) => {
+          return fileToGenerativePart(img);
+        })
       );
         
       
-      console.log(imageParts) 
+      // console.log(imageParts) 
       setResponse(""); 
       const result = await model.generateContentStream([prompt, imageParts]);
       
       let text = '';
+      let desc = new Description();
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         text += chunkText;
-        try {
-          console.log(text)
-          setResponse(JSON.parse(text));
-        }
-        catch {
-          console.log(text)
-        }
+        desc.addText(chunkText);
+        // try {
+        //   setResponse(JSON.parse(text));
+        // }
+        // catch {
+        //   // console.log(text)
+        // }
       }
+      console.log(desc)
+      console.log(JSON.parse(desc.getText()))
       setLoading(false)
-      // console.log(text)
     }
     
     

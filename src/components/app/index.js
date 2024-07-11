@@ -10,16 +10,22 @@ import Toolbar from '@mui/material/Toolbar';
 
 import ClippedDrawer from "./components/drawer"
 import GenerationPage from './components/generation_page';
+import { useDocContext } from '../../contexts/DocumentContext'
 
 export default function DescriptionMaker() {
-
   
   const [mode, setMode] = React.useState('display');
+  const [currentDesc, setCurrentDesc] = React.useState(null);
+
+  const { createDescription } = useDocContext();
 
   let navigation = useNavigate ();
 
   function onDrawerSelectedItem(item) {
     setMode(item);
+    if (item === "new") {
+      createDescription();
+    }
   }
 
   return (

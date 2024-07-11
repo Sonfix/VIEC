@@ -6,7 +6,10 @@ import { useGeneration } from '../../../contexts/GenerationContext'
 import GenerationResult from './gen_result';
 
 import { storage } from '../../../APIs/firebase';
-import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useDocContext } from '../../../contexts/DocumentContext';
+
+import { ref, getDownloadURL, uploadBytesResumable, getMetadata  } from "firebase/storage";
 
 import Stack from '@mui/material/Stack';
 import { Divider } from '@mui/material';
@@ -19,7 +22,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-export default function GenerationPage() {
+export default function GenerationPage(props) {
     const [GenMode, setGenMode] = React.useState('weighted');
     const [URLs, setURLs] = React.useState([]);
     const [progress, setProgress] = React.useState(0);
@@ -27,8 +30,12 @@ export default function GenerationPage() {
     const [selectedImages, setSelectedImages] = React.useState([]);
     const [panelExpanded, setPanelExpanded] = React.useState('info');
 
+    const [storageFileNames, setStorageFileNames] = React.useState([])
+
     const {run, response} = useGeneration();
-  
+    const { addImagesToDescription, _set_documents, currentDocument } = useDocContext();
+    const { currentUser } = useAuth();
+
     const onModeChange = (value) => {
       console.log(value);
       setGenMode(value);
@@ -38,10 +45,19 @@ export default function GenerationPage() {
       const promises = []
       
       Array.from(files).map((file) => {
-          console.log('loop');
 
-          const sotrageRef = ref(storage, `files/${file.name}`);
+          let fileName = `files/${currentUser.uid}/${file.name}`
+          
+          storageFileNames.push({
+            name: fileName,
+            type: file.type,
+            file: file,
+          } );
+          setStorageFileNames(storageFileNames);
+
+          const sotrageRef = ref(storage, fileName);
           const uploadTask = uploadBytesResumable(sotrageRef, file);
+          
           setUploading(true);
           promises.push(uploadTask)
           uploadTask.on(
@@ -55,7 +71,10 @@ export default function GenerationPage() {
               (error) => console.log(error),
               async () => {
                   await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
-                      console.log(downloadURLs)
+                    // getMetadata(sotrageRef)
+                    // .then((metadata) => {
+                    //   console.log(metadata)
+                    // })
                     setURLs(prevState => {
                           if (Array.isArray(prevState)) {
                               return [...prevState, downloadURLs];
@@ -64,7 +83,7 @@ export default function GenerationPage() {
                               return [downloadURLs];
                           }
                       });
-                      console.log("File available at", downloadURLs);
+                      // console.log("File available at", downloadURLs);
                   });
               }
           );
@@ -72,7 +91,16 @@ export default function GenerationPage() {
 
       })
       Promise.all(promises)
-          .then(() => setUploading(false))
+          .then(() => {
+            setUploading(false);
+
+            if (props?.description !== null) {
+              addImagesToDescription(currentDocument, storageFileNames)
+            }
+            console.log(props?.description)
+
+            _set_documents()
+          })
           .then(err => console.log(err))
 
   };
@@ -82,8 +110,9 @@ export default function GenerationPage() {
       e.preventDefault()
       const files = e.target.files
       setSelectedImages(files)
+      
       if (!files.length) return;
-      console.log(uploadFiles(files));
+      uploadFiles(files)
         
     }
   
@@ -93,7 +122,7 @@ export default function GenerationPage() {
 
     const onStartGeneration = () => {
       setPanelExpanded('generation');
-      console.log(selectedImages)
+      
       run(selectedImages);
     };
 
