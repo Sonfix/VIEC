@@ -10,11 +10,12 @@ import Toolbar from '@mui/material/Toolbar';
 
 import ClippedDrawer from "./components/drawer"
 import GenerationPage from './components/generation_page';
+import Dashboard from './components/dashboard';
 import { useDocContext } from '../../contexts/DocumentContext'
 
 export default function DescriptionMaker() {
   
-  const [mode, setMode] = React.useState('display');
+  const [mode, setMode] = React.useState('dash');
 
   const { createDescription } = useDocContext();
 
@@ -68,7 +69,8 @@ export default function DescriptionMaker() {
         <Container fixed>
           <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
             <Toolbar />
-            {mode === "new" && <GenerationPage />}
+            {(mode === "new" || mode === "show") && <GenerationPage />}
+            {mode === "dash" && <Dashboard onRedirect={onDrawerSelectedItem}/>}
             
           </Box>
         </Container>

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import { useDocContext } from '../../../contexts/DocumentContext';
 
 const destLang = [
   {
@@ -47,7 +48,34 @@ const category = [
     }
 ]
 
+
+
 export default function AdditionalInfo(props) {
+  const { currentDocument } = useDocContext();
+
+  const dest_lang_ref = React.createRef();
+
+  const getValueByLabel = (label, arr) => { 
+    // console.log(currentDocument)
+    // console.log(currentDocument.getPlainDescription())
+    // console.log(currentDocument.getPlainDescription()[label])
+
+    // console.log(label, arr);
+    label = currentDocument.getPlainDescription()[label]
+    
+    if (label === null ||label === undefined) return "";
+  
+    arr.forEach(e => {
+       if (e.label === label) {
+        return e.value 
+       }
+       else {
+        return ""
+       }
+    });
+  }
+
+
     return (
         <>
     <Box
@@ -67,7 +95,8 @@ export default function AdditionalInfo(props) {
           SelectProps={{
             native: true,
           }}
-          defaultValue = ""
+          ref={dest_lang_ref}
+          defaultValue = {getValueByLabel("destination-language", destLang)}
         >
           {destLang.map((option) => (
             <option key={option.value} value={option.label}>
@@ -82,7 +111,7 @@ export default function AdditionalInfo(props) {
           onChange={props?.onInfoChanged}
           helperText="Wie sollen wir den Text schreiben?"
           variant="filled"
-          defaultValue = ""
+          defaultValue = {getValueByLabel("phrasing", phrasing)}
           SelectProps={{
             native: true,
           }}
@@ -97,7 +126,7 @@ export default function AdditionalInfo(props) {
           id="category"
           select
           label="Kategorie"
-          defaultValue = ""
+          defaultValue = {getValueByLabel("category", category)}
           onChange={props?.onInfoChanged}
           helperText="In was für eine Kategorie gehört das für dich?"
           variant="filled"
@@ -127,7 +156,7 @@ export default function AdditionalInfo(props) {
           multiline
           width="100%"
           rows={4}
-          defaultValue=""
+          defaultValue = {currentDocument.getDescription("context")}
           onChange={props?.onInfoChanged}
         />
       </Box>

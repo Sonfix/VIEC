@@ -9,7 +9,7 @@ import { storage } from '../../../APIs/firebase';
 import { useAuth } from "../../../contexts/AuthContext";
 import { useDocContext } from '../../../contexts/DocumentContext';
 
-import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { ref, getDownloadURL, uploadBytesResumable, getBlob } from "firebase/storage";
 
 import Stack from '@mui/material/Stack';
 import { Divider } from '@mui/material';
@@ -22,6 +22,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CircularProgress from '@mui/material/CircularProgress';
+
 
 export default function GenerationPage(props) {
     const [GenMode, setGenMode] = React.useState('weighted');
@@ -38,7 +39,7 @@ export default function GenerationPage(props) {
     const { currentUser } = useAuth();
 
     const onModeChange = (value) => {
-      console.log(value);
+      
       setGenMode(value);
     };
 
@@ -53,6 +54,7 @@ export default function GenerationPage(props) {
             name: fileName,
             type: file.type,
             file: file,
+            url: ""
           } );
           setStorageFileNames(storageFileNames);
 
@@ -72,6 +74,19 @@ export default function GenerationPage(props) {
               (error) => console.log(error),
               async () => {
                   await getDownloadURL(uploadTask.snapshot.ref).then((downloadURLs) => {
+                    
+                    console.log(downloadURLs)
+                    storageFileNames.forEach((f) => {
+                      // console.log(uploadTask.snapshot.metadata)
+                      // console.log("F.Name: <%s> meta.name <%s>", f.name, uploadTask.snapshot.metadata.fullPath)
+                      if (f.name === uploadTask.snapshot.metadata.fullPath) {
+                        f.url = downloadURLs;
+                        addImagesToDescription(currentDocument, [f])
+                        console.log("Updated:", f);
+                        setStorageFileNames(storageFileNames);
+                      }
+                    })
+
                     setURLs(prevState => {
                           if (Array.isArray(prevState)) {
                               return [...prevState, downloadURLs];
@@ -90,13 +105,6 @@ export default function GenerationPage(props) {
       Promise.all(promises)
           .then(() => {
             setUploading(false);
-
-            if (currentDocument !== null) {
-              addImagesToDescription(currentDocument, storageFileNames)
-            }
-            console.log(currentDocument)
-
-            // _set_documents()
           })
           .then(err => console.log(err))
 
@@ -121,8 +129,8 @@ export default function GenerationPage(props) {
     const onStartGeneration = () => {
       setPanelExpanded('generation');
       
-      // _set_documents();
-      run(selectedImages);
+      // run(selectedImages);
+      run(currentDocument)
     };
 
     const onAccordionChange = (panel) => (event, isExpanded) => {
@@ -170,7 +178,8 @@ export default function GenerationPage(props) {
                   boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.05)',
               }}
             >   
-              <ImageSelection onImageUpload={onImageUpload} images={URLs}/>      
+              {/* <ImageSelection onImageUpload={onImageUpload} images={URLs}/> */}
+              <ImageSelection onImageUpload={onImageUpload} images={currentDocument.getImages().map((obj) => {return obj.getDownloadable()})}/>
               <Divider 
                 textAlign="left"
                 sx={{
@@ -188,7 +197,7 @@ export default function GenerationPage(props) {
                   mb: "25px",
                 }}
               ></Divider>
-              <Button onClick={onStartGeneration} variant="contained">Start</Button>
+              <Button onClick={onStartGeneration} disabled={uploading} variant="contained">Start</Button>
             </Box>
           </Box>
         </AccordionDetails>          

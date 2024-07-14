@@ -7,6 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Chip } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import DownloadIcon from '@mui/icons-material/Download';
+import Button from '@mui/material/Button';
 
 import * as React from 'react';
 
@@ -81,9 +82,9 @@ export default function GenerationResult(props) {
                         Merkmale
                     </Typography>
                         <List dense={true}>
-                            {props?.data.Hauptmerkmale.map((item) =>(
+                            {props?.data.Hauptmerkmale.map((item, index) =>(
                                 <ListItem>
-                                <ListItemText
+                                <ListItemText key={index}
                                     primary={item}
                                 />
                                 </ListItem>
@@ -99,13 +100,14 @@ export default function GenerationResult(props) {
                 </Grid>
             </Box>
         }
-        <Box
+        <Grid container
             sx={{
                 '& .MuiTextField-root': { m: 1.5, width: '25ch' },
             }}
             noValidate
             autoComplete="off"
         >
+            <Grid item>
             <TextField
             id="output"
             select
@@ -121,8 +123,23 @@ export default function GenerationResult(props) {
                 </option>
             ))}
             </TextField>
-            <DownloadIcon />
-        </Box>
+            </Grid>
+            <Grid item
+            sx={{
+                p: "25px"
+            }}>
+                <Button
+                    component="label"
+                    role={undefined}
+                    variant="contained"
+                    tabIndex={-1}
+                    startIcon={<DownloadIcon />}
+                    >
+                    Download
+                    {/* <VisuallyHiddenInput type="file" /> */}
+                </Button>
+            </Grid>
+        </Grid>
         </>
     )
 }

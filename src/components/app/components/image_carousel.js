@@ -51,7 +51,8 @@ export default function ImageCarousel(props) {
         enableMouseEvents
       >
         {props?.images.map((step, index) => (
-          <div>
+          <div
+          key={index}>
             {Math.abs(activeStep - index) <= 2 ? (
               <Box
                 component="img"

@@ -19,7 +19,7 @@ const auth = getAuth(app);
 
 const store = getFirestore(app);
 const storage = getStorage(app);
-const storage2 = getStorage(app, "gs://my-custom-bucket");
+
 const provider = new GoogleAuthProvider();
 
 export {
@@ -28,6 +28,5 @@ export {
   provider,
   signInWithPopup,
   storage,
-  storage2,
 };
 export default app

@@ -10,6 +10,7 @@ class Image {
         this.ShouldBeDeleted = false;
         this.Changed = false;
         this.MimeType = "";
+        this.downloadeableUrl = ""
     }
 
     getName() {
@@ -83,6 +84,15 @@ class Image {
 
     getChanged() {
         return this.Changed;
+    }
+
+    setDownloadable(url) {
+        this.downloadeableUrl = url;
+        return this;
+    }
+
+    getDownloadable() {
+        return this.downloadeableUrl;
     }
 }
 

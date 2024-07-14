@@ -10,9 +10,11 @@ import {
 } from 'firebase/firestore';
 import { store } from "../APIs/firebase"
 import { useAuth } from "./AuthContext";
+import { doc } from "firebase/firestore"; 
 import {
     ProductDescription,
     Image,
+    Description,
     // Description,
     // Tag
 } from "./data_handling"
@@ -86,7 +88,11 @@ export function DocumentProvider({ children }) {
                             .setCategory(doc.data().category)
                             .setPrompt(doc.data().prompt)
                             .setImages(doc.data().images)
-                            .setChanged(false);
+                            .setResponses(doc.data().responses)
+                            .setChanged(false)
+                            .setCreatedAt(doc.data().createdAt)
+                            .setDescription(doc.data().descriptors)
+                            .setCntId(doc.id);
 
             console.log("Requested Document: ", buff)
             _docs.push(buff);
@@ -104,12 +110,24 @@ export function DocumentProvider({ children }) {
                         let obj = new Image()
                                         .setName(s_img.data().name)
                                         .setImage_Link(s_img.data().image_link)
-                                        .setMimeType(s_img.data().mimeType);
+                                        .setMimeType(s_img.data().mimeType)
+                                        .setDownloadable(s_img.data().downloadable)
+                                        .setCntId(img);
                         Image_Objects.push(obj);
                     }
                 })
                 doc.setImages(Image_Objects)
             })
+
+            let Response_Objects = []
+            doc.getResponses().forEach((resp) => {
+                Response_Objects.push(
+                    new Description()
+                        .addText(resp)
+                )                
+            })
+            doc.setResponses(Response_Objects);
+
         })
         console.log(_docs)
 
@@ -123,55 +141,66 @@ export function DocumentProvider({ children }) {
     //  */
     async function _set_documents() {
         console.log("Start uploading to cloud", Documents)
-        Documents.forEach(doc => {
-            if (doc.getChanged() && !doc.getToDelete()) {       // Don't upload stuff which has not changed. So in most caes we will only upload/update one document per cycle.     
-                if(doc.getCntId() === "") {
+        Documents.forEach(document => {
+            if (document.getChanged() && !document.getToDelete()) {       // Don't upload stuff which has not changed. So in most caes we will only upload/update one document per cycle.     
+                if(document.getCntId() === "") {
                     // not in firestore upload
-                    console.log("Adding to cloud", doc)
+                    console.log("Adding to cloud", document)
                     
                     // if we upload newly added doc, than upload the image obj ref to
                     
-                    doc.getImages().map(async (img) => {
+                    document.getImages().map(async (img) => {
                         return addDoc(collection(store, "images"), {
                                 "name": img.getName(),
                                 "image_link": img.getImage_Link(),
                                 "active": true,
                                 "shouldBeDeleted": false,
-                                "mimeType": img.getMimeType()
+                                "mimeType": img.getMimeType(),
+                                "downloadable": img.getDownloadable(),
                         }).then((ref) => {
                             img.setCntId(ref.id);
                             img.setChanged(false);
                             
-                            doc.setCreatedAt(serverTimestamp ());
+                            document.setCreatedAt(serverTimestamp ());
                             addDoc(collection(store, "product_descriptions"), {
-                                "createdAt": doc.getCreatedAt(),
-                                "user" : doc.getUser(),
-                                "prompt": doc.getPrompt(),
+                                "createdAt": document.getCreatedAt(),
+                                "user" : document.getUser(),
+                                "prompt": document.getPrompt(),
                                 "status": 0,
-                                "images": doc.getImages().map(obj => obj.getCntId()),
-                                "descriptors": doc.getDescriptionAsString(),
-                                "responses": doc.getPlainRespsones(),
+                                "images": document.getImages().map(obj => obj.getCntId()),
+                                "descriptors": document.getDescriptionAsString(),
+                                "responses": document.getPlainRespsones(),
                             }).then((docRef) => {
-                                doc.setCntId(docRef.id);
-                                doc.setChanged(false);
+                                document.setCntId(docRef.id);
+                                console.log(docRef.id);
+                                console.log(document)
+                                document.setChanged(false);
                             })
                             
                         })
                     })                    
                 }
                 else {
-                    console.log("Upating in cloud", doc)
-                    const docRef = doc(store, "diagramproduct_descriptionsms", doc.getCntId())
+                    console.log("Upating in cloud", document)
+                    const docRef = doc(store, "product_descriptions", document.getCntId());//collection(store, "product_descriptions")
+                    console.log({
+                        "user" : document.getUser(),
+                        "prompt": document.getPrompt(),
+                        "status": 0,
+                        "images": document.getImages().map((obj) => {return obj.getCntId()}),
+                        "descriptors": document.getDescriptionAsString(),
+                        "responses": document.getPlainRespsones(),
+            })
                     updateDoc(docRef, {
-                                "user" : doc.getUser(),
-                                "prompt": doc.getPrompt(),
+                                "user" : document.getUser(),
+                                "prompt": document.getPrompt(),
                                 "status": 0,
-                                "images": doc.getImages().map(obj => obj.getCntId()),
-                                "descriptors": doc.getDescriptionAsString(),
-                                "responses": doc.getPlainRespsones(),
+                                "images": document.getImages().map(obj => obj.getCntId()),
+                                "descriptors": document.getDescriptionAsString(),
+                                "responses": document.getPlainRespsones(),
                     })
                 }
-                doc.setChanged(false)
+                document.setChanged(false)
             }
             // else if (doc.getDataByKey("toDelete")) {
             //     // _deleteDocument(doc)
@@ -216,12 +245,13 @@ export function DocumentProvider({ children }) {
         if (Array.isArray(images) ) {
                 // Promise.all(
                     images.forEach((img) => {
-                        
+                        console.log(img)
                         const obj = new Image()
                                         .setName(getFileName(img.name))
                                         .setImage_Link(img.name)
                                         .setActive(true)
-                                        .setMimeType(img.type);
+                                        .setMimeType(img.type)
+                                        .setDownloadable(img.url);
                         
                         // fileToGenerativePart(img.file)
                         //     .then((data) => (obj.setBase64Rep(data)))
@@ -230,6 +260,7 @@ export function DocumentProvider({ children }) {
                 })
             // )
         }
+        Sync()
     }
 
     function addDescriptor(description, info) {
@@ -242,6 +273,7 @@ export function DocumentProvider({ children }) {
             description.addDescription(info.id, info.value);
         }
         description.setChanged(true);
+        Sync()
     }
 
     function Sync() {
@@ -259,6 +291,15 @@ export function DocumentProvider({ children }) {
     function addResponse(doc, desc) {
         doc.addResponse(desc);
         doc.setChanged(true);
+        Sync()
+    }
+
+    function activateNewDoc(c_id) {
+        Documents.forEach((document) => {
+            if (document.getCntId() === c_id) {
+                setCurrentDoc(document);
+            }
+        })
     }
 
     // function deleteDocument(id) {
@@ -273,15 +314,6 @@ export function DocumentProvider({ children }) {
         Sync();
     }, [currentDocument, Documents])
 
-    // const value = {
-    //     currentDocument,
-    //     getDocuments,
-    //     getDocument,
-    //     createDocument,
-    //     setCurrentDocument,
-    //     updateDocument,
-    //     deleteDocument,
-    // }
 
     const value = {
         currentDocument,
@@ -290,6 +322,8 @@ export function DocumentProvider({ children }) {
         _set_documents,
         addDescriptor,
         addResponse,
+        Documents,
+        activateNewDoc,
     }
 
    return(

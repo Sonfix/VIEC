@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react"
 import { GoogleGenerativeAI} from "@google/generative-ai"
 import { useDocContext } from "./DocumentContext"
 import { Description } from "./data_handling"
+import { storage } from "../APIs/firebase"
+import { ref, getBlob } from "firebase/storage";
 
 const GenerationContext = React.createContext()
 
@@ -18,12 +20,18 @@ export function GenerationProvider({ children }) {
 
     // Access your API key as an environment variable (see "Set up your API key" above)
     const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+
+    const downloadImages = async (img) => {
+        let storageRef = ref(storage, img);
+        // Utilities
+        return fileToGenerativePart(await getBlob(storageRef));
+    }
          
     // Converts a File object to a GoogleGenerativeAI.Part object.
     async function fileToGenerativePart(file) {
       const base64EncodedDataPromise = new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onloadend = () => resolve(reader.result.split(",")[1]);
         reader.readAsDataURL(file);
       });
       return {
@@ -68,21 +76,29 @@ export function GenerationProvider({ children }) {
             "Tags": ["Tag1", "Tag2", "Tag3"]\
           }';
      
-
+      // await downloadImages(images.getImages().map((obj) => {return obj.getDownloadable()}));
+      
       const imageParts = await Promise.all(
-        Array.from(images).map((img) => {
-          return fileToGenerativePart(img);
+        Array.from(images.getImages()).map((img) => {
+          return downloadImages(img.getDownloadable());
         })
       );
+      console.log(imageParts)
+      // const imageParts = await Promise.all(
+      //   Array.from(images).map((img) => {
+      //     return fileToGenerativePart(img);
+      //   })
+      // );
         
       const result = await model.generateContentStream([prompt, imageParts]);
       
       let desc = new Description();
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
+        console.log(chunkText)
         desc.addText(chunkText);
       }
-      
+      console.log(desc)
       addResponse(currentDocument, desc);
       
       // console.log(currentDocument)

@@ -8,7 +8,7 @@ class ProductDescription {
         this.Prompt = null;
         this.CreatedAt = null;
         this.Images = [];
-        this.Descriptions = {};
+        this.Descriptions = JSON.parse("{}");
         this.Response = [];
         this.Changed = false;
         this.ToDelete = false;
@@ -64,6 +64,11 @@ class ProductDescription {
         return this;
     }
 
+    setDescription(desc) {
+        this.Descriptions = JSON.parse(desc);
+        return this;
+    }
+
     setChanged(changed) {
         this.Changed = changed;
         return this
@@ -97,10 +102,15 @@ class ProductDescription {
     }
 
     getDescription(key) {
+        
         if (key in this.Descriptions) {
             return this.Descriptions.key;
         }
         return null;
+    }
+
+    getPlainDescription() {
+        return this.Descriptions;
     }
 
     getDescriptionAsString() {
@@ -127,6 +137,11 @@ class ProductDescription {
         return this.Response.map((desc) => {
             return desc.getText();
         })
+    }
+
+    setResponses(resps) {
+        this.Response = resps;
+        return this;
     }
 
     getLatestResponse() {
